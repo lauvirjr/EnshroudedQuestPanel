@@ -22,7 +22,7 @@ Copy-Item $dll $saida
 Copy-Item (Join-Path $raiz 'dist\questpanel_layer.json') $saida
 Copy-Item (Join-Path $raiz 'data\guias_pt.json') $saida
 foreach ($f in 'instalador.ps1', 'atualizar.ps1', 'extrair_missoes.lua', 'VERSION',
-                'Instalar.bat', 'Atualizar.bat', 'Remover.bat') {
+                'Instalar.bat', 'Atualizar.bat', 'Remover.bat', 'Ver estado.bat') {
     Copy-Item (Join-Path $raiz "instalador\$f") $saida
 }
 Copy-Item (Join-Path $raiz 'LEIA-ME.txt') $saida -ErrorAction SilentlyContinue
