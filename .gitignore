@@ -1,0 +1,30 @@
+# compilacao
+build/
+pacote/
+dist/
+*.dll
+*.exe
+*.obj
+*.lib
+*.exp
+*.pdb
+
+# headers do Vulkan: cada um baixa o seu
+third_party/
+
+# TEXTO DO JOGO -- nunca entra no repositorio.
+# Nomes e descricoes de missoes sao da Keen Games; o instalador gera esses
+# arquivos na maquina de quem usa, a partir da copia do jogo da pessoa.
+catalogo.txt
+loca_chaves.txt
+loca_pt.json
+missoes_do_jogo.tsv
+ids_missoes.txt
+data/missoes_do_jogo.tsv
+types.json
+
+# dados locais
+*.log
+*.bmp
+*.png
+rastreio.txt

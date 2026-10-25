@@ -1,0 +1,4 @@
+EXPORTS
+  vkNegotiateLoaderLayerInterfaceVersion
+  QuestPanel_GetInstanceProcAddr
+  QuestPanel_GetDeviceProcAddr

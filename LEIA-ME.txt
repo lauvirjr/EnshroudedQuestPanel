@@ -1,0 +1,71 @@
+PAINEL DE MISSOES PARA ENSHROUDED
+=================================
+
+Mostra o passo a passo da missao dentro do jogo, e deixa escolher qual missao
+ver sem sair dele.
+
+
+COMO INSTALAR
+  1. Feche o Enshrouded.
+  2. De dois cliques em "Instalar.bat".
+  3. Abra o jogo e entre no mundo.
+
+  Precisa de internet na instalacao, uma vez so: o instalador baixa o extrator
+  e le as missoes da sua propria copia do jogo (veja "POR QUE NAO VEM PRONTO").
+
+
+TECLAS
+  F6     abre a lista de missoes
+           setas         movem (PageUp/PageDown pulam de 10 em 10)
+           Enter ou F6   escolhe
+           Esc           cancela
+  F5     mostra e esconde o painel
+
+  F7 a F11 ficam livres para o minimapa Shroudweave. Com a lista aberta, as
+  setas, o Enter e o Esc nao chegam ao jogo -- senao o personagem andaria, o
+  chat abriria e o menu apareceria no meio da escolha.
+
+
+O QUE ELE FAZ
+  - 186 missoes com passo a passo pratico, em portugues
+  - esconde as que voce ja concluiu, durante o jogo, sem reiniciar nada
+  - comeca escondido e lembra como voce deixou
+  - convive com o minimapa Shroudweave
+
+
+ATUALIZAR
+  "Atualizar.bat" procura versao nova, mostra o que mudou e troca os arquivos.
+  A versao anterior fica guardada numa pasta backup-<versao>.
+
+DESINSTALAR
+  "Remover.bat". O jogo volta ao normal na proxima abertura.
+
+
+POR QUE NAO VEM PRONTO
+  Os nomes e textos das missoes sao da Keen Games, e distribui-los seria
+  redistribuir conteudo do jogo. Por isso o pacote nao os traz: na instalacao
+  eles sao lidos da sua propria copia do Enshrouded, com o kfc-parser (de
+  Brabb3l), que o instalador baixa na hora.
+
+  O que vem junto sao os guias pesquisados (guias_pt.json): texto escrito a
+  partir de busca na internet, com as fontes registradas -- nao e copia do
+  jogo. E e o que o texto oficial nao da: onde cavar, que ferramenta levar,
+  qual inimigo aparece.
+
+
+SE DER PROBLEMA
+  - %LOCALAPPDATA%\EnshroudedQuestPanel\layer.log diz se a camada carregou e
+    se conseguiu desenhar.
+  - A variavel de ambiente DISABLE_QUEST_PANEL_LAYER=1 desliga a camada sem
+    desinstalar nada.
+  - Se a lista vier vazia, rode "Instalar.bat" de novo: ele refaz o catalogo.
+  - Depois de uma atualizacao do Enshrouded pode ser preciso refazer o
+    catalogo (o mesmo "Instalar.bat").
+
+
+CREDITOS
+  Shroudweave Minimap - elxokker e Aerox912 (mod independente)
+  kfc-parser / EML - Brabb3l, GPL-3.0 (baixado na instalacao, nao incluido)
+  Codigo deste projeto sob licenca MIT.
+
+  Enshrouded e marca da Keen Games. Projeto independente, sem relacao com ela.
