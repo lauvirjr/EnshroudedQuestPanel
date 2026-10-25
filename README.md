@@ -37,17 +37,25 @@ aberta, essas teclas são interceptadas e não chegam ao jogo.
 
 1. Baixe o `.zip` da [última release](../../releases/latest) e descompacte
 2. Feche o Enshrouded
-3. Dois cliques em **`Instalar.bat`**
+3. Dois cliques em **`Painel de Missoes.bat`** → botão **Instalar**
 4. Abra o jogo
+
+A mesma janela mostra o que está instalado, procura versão nova sozinha ao
+abrir e tem os botões de atualizar, refazer a lista e remover. Quem preferir
+sem janela encontra os atalhos soltos em `avancado/`.
 
 Na instalação ele lê as missões da **sua** cópia do jogo (veja
 [Por que não vem pronto](#por-que-não-vem-pronto)). Precisa de internet uma
 vez, para baixar o extrator.
 
-Para atualizar depois: **`Atualizar.bat`**. Ele consulta as releases, avisa o
-que mudou e troca os arquivos, guardando a versão anterior.
+### Por que não é um .exe
 
-Para sair: **`Remover.bat`**. Tira o registro e o jogo volta ao normal.
+Um executável não assinado, vindo de um repositório sem reputação, cai no
+SmartScreen e em heurística de antivírus — foi o que aconteceu com o
+ShroudForge, que teve uma DLL marcada como trojan pelo Defender. Script
+qualquer um abre no bloco de notas e confere o que roda antes de clicar.
+A janela é feita com Windows Forms pelo próprio PowerShell, então não há
+nada compilado no meio.
 
 ## O que ele faz
 

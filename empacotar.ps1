@@ -21,10 +21,13 @@ if (-not (Test-Path $dll)) { throw 'compile antes: .\build.ps1' }
 Copy-Item $dll $saida
 Copy-Item (Join-Path $raiz 'dist\questpanel_layer.json') $saida
 Copy-Item (Join-Path $raiz 'data\guias_pt.json') $saida
-foreach ($f in 'instalador.ps1', 'atualizar.ps1', 'extrair_missoes.lua', 'VERSION',
-                'Instalar.bat', 'Atualizar.bat', 'Remover.bat', 'Ver estado.bat') {
+foreach ($f in 'instalador.ps1', 'atualizar.ps1', 'interface.ps1', 'extrair_missoes.lua',
+                'VERSION', 'Painel de Missoes.bat') {
     Copy-Item (Join-Path $raiz "instalador\$f") $saida
 }
+# os atalhos sem janela ficam numa subpasta, para quem preferir
+Copy-Item (Join-Path $raiz 'instalador\avancado') $saida -Recurse -Force
+
 Copy-Item (Join-Path $raiz 'LEIA-ME.txt') $saida -ErrorAction SilentlyContinue
 
 # conferencia: nada de texto do jogo pode vazar para o pacote

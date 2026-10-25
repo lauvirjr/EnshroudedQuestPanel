@@ -1,4 +1,4 @@
-# Instala o Painel de Missoes do Enshrouded.
+﻿# Instala o Painel de Missoes do Enshrouded.
 #
 # O pacote NAO traz os textos do jogo: eles sao propriedade da Keen Games e
 # seriam redistribuicao. Em vez disso, este script extrai o catalogo da SUA

@@ -7,8 +7,13 @@ ver sem sair dele.
 
 COMO INSTALAR
   1. Feche o Enshrouded.
-  2. De dois cliques em "Instalar.bat".
-  3. Abra o jogo e entre no mundo.
+  2. De dois cliques em "Painel de Missoes.bat".
+  3. Na janela que abrir, clique em Instalar.
+  4. Abra o jogo e entre no mundo.
+
+  A mesma janela avisa quando sai versao nova e tem os botoes de atualizar,
+  refazer a lista e remover. Quem preferir sem janela encontra os atalhos
+  soltos na pasta "avancado".
 
   Precisa de internet na instalacao, uma vez so: o instalador baixa o extrator
   e le as missoes da sua propria copia do jogo (veja "POR QUE NAO VEM PRONTO").
@@ -33,12 +38,10 @@ O QUE ELE FAZ
   - convive com o minimapa Shroudweave
 
 
-ATUALIZAR
-  "Atualizar.bat" procura versao nova, mostra o que mudou e troca os arquivos.
-  A versao anterior fica guardada numa pasta backup-<versao>.
-
-DESINSTALAR
-  "Remover.bat". O jogo volta ao normal na proxima abertura.
+ATUALIZAR E DESINSTALAR
+  Tudo pela mesma janela do "Painel de Missoes.bat". Ela procura versao nova
+  sozinha ao abrir; atualizando, a versao anterior fica guardada numa pasta
+  backup-<versao>. Remover devolve o jogo ao normal na proxima abertura.
 
 
 POR QUE NAO VEM PRONTO
