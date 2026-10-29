@@ -27,11 +27,12 @@ internet e escrito em português.
 | Tecla | O que faz |
 |---|---|
 | **F6** | abre a lista de missões · setas movem · Enter ou F6 escolhe · Esc cancela |
-| **F5** | mostra e esconde o painel |
+| **F5** | mostra e esconde o painel · com a lista aberta, fecha a lista e esconde |
 
-F7 a F11 ficam livres para o minimapa Shroudweave. No Enshrouded o Enter abre
-o chat, o Esc abre o menu e o F10 é o menu principal — por isso, com a lista
-aberta, essas teclas são interceptadas e não chegam ao jogo.
+F7 a F11 ficam livres para o minimapa Shroudweave. Com a lista aberta, as
+setas e o Enter (que no Enshrouded abre o chat) são interceptados e não chegam
+ao jogo. O Esc fecha a lista **e** segue para o jogo, para continuar fechando
+inventário, mapa e menus. Ao sair do mundo, a lista se fecha sozinha.
 
 ## Instalar
 

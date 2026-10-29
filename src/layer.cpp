@@ -250,6 +250,14 @@ bool TeclaDeLista(DWORD vk)
            vk == VK_RETURN || vk == VK_ESCAPE;
 }
 
+// O Esc fecha a lista mas segue para o jogo. Engolido, ele deixava de fechar o
+// inventario ou o mapa abertos por cima da lista -- e fora do mundo, com a
+// lista aberta e invisivel, parecia que o Esc tinha parado de funcionar.
+bool TeclaEngolida(DWORD vk)
+{
+    return TeclaDeLista(vk) && vk != VK_ESCAPE;
+}
+
 // Soma a tecla na navegacao da lista; chamado pelo desvio de GetRawInputData.
 void ContarTecla(DWORD vk)
 {
@@ -268,7 +276,7 @@ LRESULT CALLBACK ProcTeclado(int code, WPARAM wParam, LPARAM lParam)
 {
     if (code == HC_ACTION && g_listaAberta.load() && JogoEmFoco()) {
         const auto* info = reinterpret_cast<const KBDLLHOOKSTRUCT*>(lParam);
-        if (TeclaDeLista(info->vkCode)) {
+        if (TeclaEngolida(info->vkCode)) {
             // So engole; quem conta e o desvio de GetRawInputData. Medido em
             // 29/10/2026: com o Enshrouded em foco este gancho nem e chamado,
             // entao contar aqui deixava a lista parada.
@@ -331,10 +339,12 @@ UINT WINAPI HookGetRawInputData(HRAWINPUT entrada, UINT comando, LPVOID dados,
         // chega como Raw Input, entao segurar a seta rola a lista.
         if (!(bruto->data.keyboard.Flags & RI_KEY_BREAK))      // so ao apertar
             ContarTecla(vk);
-        // 0xFF e o codigo que o proprio Windows usa para "tecla sem mapeamento"
-        bruto->data.keyboard.VKey = 0xFF;
-        bruto->data.keyboard.MakeCode = 0;
-        bruto->data.keyboard.Message = WM_NULL;
+        if (TeclaEngolida(vk)) {
+            // 0xFF e o codigo que o proprio Windows usa para "tecla sem mapeamento"
+            bruto->data.keyboard.VKey = 0xFF;
+            bruto->data.keyboard.MakeCode = 0;
+            bruto->data.keyboard.Message = WM_NULL;
+        }
     }
     return r;
 }
@@ -712,13 +722,18 @@ void PollHotkey()
     if (g_panel.escolhendo) {
         const std::size_t total = g_panel.visiveis.empty()
                                 ? g_panel.catalogo.size() : g_panel.visiveis.size();
-        if (esc) {
+        if (esc || f5) {
             g_panel.escolhendo = false;
             g_listaAberta.store(false);
             if (g_panel.mostrandoPelaLista) {   // cancelou: volta a esconder
                 g_panel.mostrandoPelaLista = false;
                 g_panel.wanted = false;
             }
+            if (f5 && g_panel.wanted) {         // F5 esconde, com ou sem lista
+                g_panel.wanted = false;
+                GravarPreferencia();
+            }
+            if (f5) Log("F5: lista fechada, painel escondido");
             pedirRedesenho();
             return;
         }
@@ -817,13 +832,16 @@ void RefreshPanel(int maxWidth)
         g_panel.dirty = true;
         return;
     }
-    if (now - g_panel.lastCheck < 1000 && g_panel.hasStamp) return;
+    if (now - g_panel.lastCheck < 1000) return;
     g_panel.lastCheck = now;
 
     const std::wstring path = questpanel::PanelFilePath();
     questpanel::FileStamp stamp;
     if (!questpanel::ReadStamp(path, stamp)) {
-        if (!g_panel.quest.empty()) {
+        // So apaga se a missao veio do arquivo e ele sumiu. Quem instala so o
+        // pacote nao tem editor nem active.txt: a missao escolhida pela lista
+        // era apagada no segundo seguinte e o painel abria e fechava.
+        if (g_panel.hasStamp && !g_panel.quest.empty()) {
             g_panel.quest = questpanel::Quest{};
             g_panel.raster.clear();
             g_panel.dirty = true;
@@ -1066,6 +1084,18 @@ static VKAPI_ATTR VkResult VKAPI_CALL QuestPanel_QueuePresentKHR(
     PollHotkey();
 
     RefreshWorldState();
+    if (g_panel.escolhendo && !g_panel.inWorld) {
+        // Fora do mundo a lista nao aparece; aberta, seguiria engolindo as
+        // setas e o Enter dos menus sem o jogador ver por que.
+        g_panel.escolhendo = false;
+        g_listaAberta.store(false);
+        if (g_panel.mostrandoPelaLista) {
+            g_panel.mostrandoPelaLista = false;
+            g_panel.wanted = false;
+        }
+        g_panel.redraw = true;
+        Log("saiu do mundo: lista fechada");
+    }
     const bool drawable = g_panel.wanted && g_panel.inWorld && presentInfo->swapchainCount > 0;
     if (!drawable) return table->QueuePresentKHR(queue, presentInfo);
 
