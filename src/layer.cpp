@@ -201,7 +201,6 @@ struct PanelState {
     bool inWorld = false;       // dentro de um mundo, pelo log do jogo
     bool dirty = false;
     DWORD lastCheck = 0;
-    DWORD lastKey = 0;
     DWORD lastWorldCheck = 0;
     bool redraw = false;        // F7/F9 mudaram: rasterizar sem reler o arquivo
     int lastWidth = 0;
@@ -251,14 +250,28 @@ bool TeclaDeLista(DWORD vk)
            vk == VK_RETURN || vk == VK_ESCAPE;
 }
 
+// Soma a tecla na navegacao da lista; chamado pelo desvio de GetRawInputData.
+void ContarTecla(DWORD vk)
+{
+    switch (vk) {
+        case VK_UP:     g_navegacao -= 1;  break;
+        case VK_DOWN:   g_navegacao += 1;  break;
+        case VK_PRIOR:  g_navegacao -= 10; break;
+        case VK_NEXT:   g_navegacao += 10; break;
+        case VK_RETURN: g_confirmar.store(true); break;
+        case VK_ESCAPE: g_cancelar.store(true);  break;
+        default: break;
+    }
+}
+
 LRESULT CALLBACK ProcTeclado(int code, WPARAM wParam, LPARAM lParam)
 {
     if (code == HC_ACTION && g_listaAberta.load() && JogoEmFoco()) {
         const auto* info = reinterpret_cast<const KBDLLHOOKSTRUCT*>(lParam);
         if (TeclaDeLista(info->vkCode)) {
-            // Quem conta os passos e o desvio de GetRawInputData, que e por onde
-            // o jogo le de verdade; aqui so engolimos a tecla para ela tambem
-            // nao escapar por uma eventual mensagem.
+            // So engole; quem conta e o desvio de GetRawInputData. Medido em
+            // 29/10/2026: com o Enshrouded em foco este gancho nem e chamado,
+            // entao contar aqui deixava a lista parada.
             return 1;
         }
     }
@@ -313,20 +326,11 @@ UINT WINAPI HookGetRawInputData(HRAWINPUT entrada, UINT comando, LPVOID dados,
     if (bruto->header.dwType != RIM_TYPEKEYBOARD) return r;
     const USHORT vk = bruto->data.keyboard.VKey;
     if (TeclaDeLista(vk)) {
-        // A navegacao sai daqui, e nao do gancho de mensagens: o jogo registra
-        // Raw Input e as mensagens de teclado nem chegam a existir, entao
-        // aquele caminho nunca via as setas.
-        if (!(bruto->data.keyboard.Flags & RI_KEY_BREAK)) {     // so ao apertar
-            switch (vk) {
-                case VK_UP:     g_navegacao -= 1;  break;
-                case VK_DOWN:   g_navegacao += 1;  break;
-                case VK_PRIOR:  g_navegacao -= 10; break;
-                case VK_NEXT:   g_navegacao += 10; break;
-                case VK_RETURN: g_confirmar.store(true); break;
-                case VK_ESCAPE: g_cancelar.store(true);  break;
-                default: break;
-            }
-        }
+        // A navegacao sai daqui: e o unico caminho que comprovadamente ve as
+        // setas com o jogo em foco. A repeticao automatica do teclado tambem
+        // chega como Raw Input, entao segurar a seta rola a lista.
+        if (!(bruto->data.keyboard.Flags & RI_KEY_BREAK))      // so ao apertar
+            ContarTecla(vk);
         // 0xFF e o codigo que o proprio Windows usa para "tecla sem mapeamento"
         bruto->data.keyboard.VKey = 0xFF;
         bruto->data.keyboard.MakeCode = 0;
@@ -617,19 +621,35 @@ void GarantirVarredura()
     g_threadVarredura = CreateThread(nullptr, 0, ThreadVarredura, nullptr, 0, nullptr);
 }
 
+// Verdadeiro so no quadro em que a tecla foi apertada. Sem isto, segurar a
+// tecla dispara a acao a cada passagem e o painel pisca.
+bool Apertou(int vk, bool& anterior)
+{
+    const bool agora = (GetAsyncKeyState(vk) & 0x8000) != 0;
+    const bool borda = agora && !anterior;
+    anterior = agora;
+    return borda;
+}
+
 void PollHotkey()
 {
-    const DWORD now = GetTickCount();
-    if (now - g_panel.lastKey < 220) return;
+    static bool antesF5 = false, antesF6 = false, antesEnter = false, antesEsc = false;
     // Duas teclas, so. F6 abre a lista e confirma; F5 mostra e esconde o painel.
     // F7..F11 ficaram para o minimapa Shroudweave, e no Enshrouded o Enter abre
     // o chat, o Esc abre o menu e o F10 abre o menu principal.
-    const bool f5 = (GetAsyncKeyState(VK_F5) & 0x8000) != 0;
+    const bool f5 = Apertou(VK_F5, antesF5);
     // F6, e nao F9: o minimapa usa F9 para diminuir o proprio tamanho
-    const bool f6 = (GetAsyncKeyState(VK_F6) & 0x8000) != 0;
+    const bool f6 = Apertou(VK_F6, antesF6);
     const int passos = g_navegacao.exchange(0);     // o desvio acumulou
-    const bool enter = g_confirmar.exchange(false);
-    const bool esc = g_cancelar.exchange(false);
+
+    // Enter e Esc vem do desvio de GetRawInputData. Onde ele nao instalou,
+    // valem pelo teclado comum: ai tambem chegam ao jogo, mas a lista responde.
+    const bool semDesvio = g_origGetRawInputData == nullptr;
+    const bool enterTeclado = Apertou(VK_RETURN, antesEnter);
+    const bool escTeclado = Apertou(VK_ESCAPE, antesEsc);
+    const bool enter = g_confirmar.exchange(false) || (semDesvio && enterTeclado);
+    const bool esc = g_cancelar.exchange(false) || (semDesvio && escTeclado);
+
     const bool navegando = g_panel.escolhendo && (passos != 0 || enter || esc);
     if (!f5 && !f6 && !navegando) return;
 
@@ -637,7 +657,6 @@ void PollHotkey()
     DWORD pid = 0;
     if (foreground) GetWindowThreadProcessId(foreground, &pid);
     if (pid != GetCurrentProcessId()) return;
-    g_panel.lastKey = now;
 
     const auto pedirRedesenho = []() {
         g_panel.redraw = true;
@@ -715,7 +734,6 @@ void PollHotkey()
             const long long atual = static_cast<long long>(g_panel.escolha) + passos;
             const long long n = static_cast<long long>(total);
             g_panel.escolha = static_cast<std::size_t>(((atual % n) + n) % n);   // da a volta
-            g_panel.lastKey = now - 200;    // segurar a seta rola a lista
             pedirRedesenho();
         }
         return;
